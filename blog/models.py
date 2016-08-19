@@ -21,8 +21,11 @@ class Post(models.Model):
 	tags = models.ManyToManyField('blog.Tag')
 	objects = PostManager()
 	
-	def __unicode__(self):
-		return str(self.title)
+	class Meta:
+		ordering = ['-updated']		
+	
+	def __str__(self):
+		return self.title
 		
 	def get_absolute_url(self):
 		return reverse('blog.views.post', args=[self.slug])
@@ -39,40 +42,27 @@ class Post(models.Model):
 	def get_next_post(self):
 		return self.get_next_by_updated()
 		
-	class Meta:
-		ordering = ['-updated']	
-		
 class Category(models.Model):
 	name = models.CharField(max_length=50, db_index=True)
 	description = models.TextField()
 	slug = models.SlugField(max_length=50, unique=True, blank=True, null=True)
 	
-	def save(self):
-		if not self.slug:
-			self.slug = slugify(unicode(self.name))
-		super(Category, self).save()
-	
-	def get_absolute_url(self):
-		return reverse('blog.views.category', args=[self.slug])
-	
-	def __unicode__(self):
-		return self.name
-		
 	class Meta:
 		verbose_name_plural = 'categories'
+	
+	def __str__(self):
+		return self.name
+	
+	def get_absolute_url(self):
+		return reverse('blog.views.category', args=[self.slug])	
 		
 class Tag(models.Model):
 	name = models.CharField(max_length=20, db_index=True)
 	description = models.TextField(max_length=255, null=True, default='')
 	slug = models.SlugField(max_length=50, unique=True, blank=True, null=True)
-	
-	def save(self):
-		if not self.slug:
-			self.slug = slugify(unicode(self.name))
-		super(Tag, self).save()
+		
+	def __str__(self):
+		return self.name		
 		
 	def get_absolute_url(self):
 		return reverse('blog.views.tag', args=[self.slug])
-		
-	def __unicode__(self):
-		return self.name
