@@ -54,6 +54,12 @@ ROOT_URLCONF = 'titanobloga.urls'
 
 TEMPLATES = [
     {
+    	'BACKEND': 'django.template.backends.jinja2.Jinja2',
+    	'DIRS': [os.path.join(BASE_DIR, 'templates/jinja2')],
+    	'APP_DIRS': True,
+    	'OPTIONS':{'environment': 'titanobloga.jinja2.environment',},
+    },
+    {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
@@ -62,15 +68,12 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.template.context_processors.media',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
-    },
-    {
-    	'BACKEND': 'django.template.backends.jinja2.Jinja2',
-    	'DIRS': [os.path.join(BASE_DIR, 'templates/jinja2')],
-    	'APP_DIRS': True,
-    	'OPTIONS':{'environment': 'titanobloga.jinja2.environment',},
     },
 ]
 

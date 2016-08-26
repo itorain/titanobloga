@@ -4,6 +4,6 @@ from blog.models import Post
 from . import views
 
 urlpatterns = [
-    #url(r'^$', views.index, name='index'),
-    url(r'^$', ListView.as_view(model=Post,)),
+    url(r'^$', views.index, name='index'),
+    #url(r'^$', ListView.as_view(model=Post,)),
 ]

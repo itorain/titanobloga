@@ -1,0 +1,11 @@
+{% extends "jinja2/header.html" %}
+	{% block content %}
+        {% for post in posts %}
+        <h1>{{ post.title }}</h1>
+        <h3>{{ post.updated }}</h3>
+        {{ post.body }}
+        {% endfor %}
+    {% endblock %}
+    </body>
+
+</html>
