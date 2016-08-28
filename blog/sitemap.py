@@ -10,7 +10,7 @@ class PostSitemap(Sitemap):
 		return Post.objects.all()
 
 	def lastmod(self, obj):
- 		return obj.pub_date
+ 		return obj.updated
 
 class FlatpageSitemap(Sitemap):
 	changefreq = "always"
