@@ -32,8 +32,7 @@ class Post(models.Model):
 		return self.title
 		
 	def get_absolute_url(self):
-		return '/blog/%s' % (self.slug)
-		#return reverse('post_view', args=[self.slug])
+		return reverse('blog:post_view', args=[self.slug])
 		
 	def save(self, *args, **kwargs):
 		if not self.slug:
@@ -65,8 +64,7 @@ class Category(models.Model):
 		return self.name
 	
 	def get_absolute_url(self):
-		return '/blog/category/%s' % (self.slug)
-		#return reverse('category_view', args=[self.slug])	
+		return reverse('blog:category_view', args=[self.slug])	
 		
 	def save(self, *args, **kwargs):
 		if not self.slug:
@@ -82,8 +80,7 @@ class Tag(models.Model):
 		return self.name		
 		
 	def get_absolute_url(self):
-		return '/blog/tag/%s' % (self.slug)
-		#return reverse('tag_view', args=[self.slug])
+		return reverse('blog:tag_view', args=[self.slug])
 
 	def save(self, *args, **kwargs):
 		if not self.slug:
