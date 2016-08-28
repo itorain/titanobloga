@@ -2,6 +2,7 @@ from django.test import TestCase, LiveServerTestCase, Client
 from django.utils import timezone
 from django.contrib.auth.models import User
 from blog.models import Post, Category, Tag
+import markdown
 
 # Reusable create post function
 def create_post():

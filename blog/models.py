@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.utils.text import slugify
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.db.models.signals import post_save
+#from django.core.cache import cache
 
 class PostManager(models.Manager):
     def all(self):
@@ -16,9 +19,10 @@ class Post(models.Model):
 	description = models.TextField(max_length=200)
 	created = models.DateTimeField(auto_now_add=True, auto_now=False)
 	category = models.ForeignKey('blog.Category', blank=True, null=True)
+	site = models.ForeignKey(Site)
 	updated = models.DateTimeField(db_index=True, blank=True, null=True)
 	published = models.BooleanField(default=False)
-	tags = models.ManyToManyField('blog.Tag')
+	tags = models.ManyToManyField('blog.Tag', blank=True, null=True)
 	objects = PostManager()
 	
 	class Meta:
@@ -28,7 +32,14 @@ class Post(models.Model):
 		return self.title
 		
 	def get_absolute_url(self):
-		return reverse('blog.views.post', args=[self.slug])
+		return '/blog/%s' % (self.slug)
+		#return reverse('post_view', args=[self.slug])
+		
+	def save(self, *args, **kwargs):
+		if not self.slug:
+			self.slug = slugify(str(self.name))
+		super(Post, self).save(*args, **kwargs)
+
 		
 	def publish(self):
 		self.published = True
@@ -54,8 +65,14 @@ class Category(models.Model):
 		return self.name
 	
 	def get_absolute_url(self):
-		return reverse('blog.views.category', args=[self.slug])	
+		return '/blog/category/%s' % (self.slug)
+		#return reverse('category_view', args=[self.slug])	
 		
+	def save(self, *args, **kwargs):
+		if not self.slug:
+			self.slug = slugify(str(self.name))
+		super(Category, self).save(*args, **kwargs)
+	
 class Tag(models.Model):
 	name = models.CharField(max_length=20, db_index=True)
 	description = models.TextField(max_length=255, null=True, default='')
@@ -65,4 +82,17 @@ class Tag(models.Model):
 		return self.name		
 		
 	def get_absolute_url(self):
-		return reverse('blog.views.tag', args=[self.slug])
+		return '/blog/tag/%s' % (self.slug)
+		#return reverse('tag_view', args=[self.slug])
+
+	def save(self, *args, **kwargs):
+		if not self.slug:
+			self.slug = slugify(str(self.name))
+		super(Tag, self).save(*args, **kwargs)
+
+# Define signals		
+def new_post(sender, instance, created, **kwargs):
+	cache.clear()
+	
+# Set up signals
+post_save.connect(new_post, sender=Post)		

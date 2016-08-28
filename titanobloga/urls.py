@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.flatpages import views
 
 urlpatterns = [
-    url(r'^blog/', include('blog.urls')),
-    url(r'^admin/', admin.site.urls),
+	url(r'^admin/', admin.site.urls),
+    url(r'', include('blog.urls')),
+    url(r'^About/$', views.flatpage, {'url': '/About/'}, name='about_page'),
+    url(r'^Contact/$', views.flatpage, {'url':'/Contact/'}, name='contact_page')
 ]
