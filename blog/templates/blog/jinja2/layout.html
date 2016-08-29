@@ -24,7 +24,7 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 
         <![endif]-->
-    <section class="hero is-primary is-bold is-medium">
+    <section class="hero is-primary is-bold is-small">
     	<div class="hero-head">
     	</div>
     	<div class="hero-body">
@@ -43,15 +43,21 @@
     				<ul>
     					{% block navlist %}
     					{% endblock %}
-    				<ul>
+    				</ul>
     			</div>
     		</nav>
-    	</div>	
+			<form action="/blog/search" method="GET">
+				<p class="control is-pulled-right has-addons">
+					<input class="input" type="text" placeholder="Search..." name="search_input">
+					<input class="button is-white is-outlined" type="submit">Search</a>
+				</p>
+			</form>
+    	</div>
     </section>
     <section class="section">
 		<div class="container is-fluid">
 			{% block content %}
-	   		{% endblock %}	
+	   		{% endblock %}
 		</div>
 	<footer class="footer">
 		<div class="container">
@@ -65,7 +71,7 @@
         			</a>
       			</p>
       		</div>
-      	</div> 
+      	</div>
 	</footer>
 </body>
 </html>

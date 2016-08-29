@@ -21,5 +21,4 @@ urlpatterns = [
     url(r'^blog/tag/(?P<slug>[\w\-]+)/$', views.TagListView.as_view(model=Tag, template_name='blog/jinja2/tag_view.html', paginate_by=5), name='tag_view'),
     url(r'^blog/search$', views.get_search_results, name='search'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-    #url(r'^$', ListView.as_view(model=Post,)),
 ]

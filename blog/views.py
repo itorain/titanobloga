@@ -8,7 +8,7 @@ from .models import Post, Category, Tag
 import markdown2
 
 class CategoryListView(ListView):
-	
+
 	def get_queryset(self):
 		slug = self.kwargs['slug']
 		try:
@@ -16,7 +16,7 @@ class CategoryListView(ListView):
 			return Post.objects.filter(category=category)
 		except Category.DoesNotExist:
 			return Post.objects.none()
-			
+
 	def get_context_data(self, **kwargs):
 		context = super(CategoryListView, self).get_context_data(**kwargs)
 		slug = self.kwargs['slug']
@@ -25,9 +25,9 @@ class CategoryListView(ListView):
 		except Category.DoesNotExist:
 			context['category'] = None
 		return context
-		
+
 class TagListView(ListView):
-	
+
 	def get_queryset(self):
 		slug = self.kwargs['slug']
 		try:
@@ -35,7 +35,7 @@ class TagListView(ListView):
 			return tag.post_set.all()
 		except Tag.DoesNotExist:
 			return Post.objects.none()
-			
+
 	def get_context_data(self, **kwargs):
 		context = super(TagListView, self).get_context_data(**kwargs)
 		slug = self.kwargs['slug']
@@ -60,31 +60,36 @@ def post_list(request):
 	#If page is out of range
 		posts = paginator.page(paginator.num_pages)
 	return render(request, 'blog/jinja2/post_list.html',{'posts':posts})
-    
+
 def post(request, slug):
 	post = get_object_or_404(Post, slug=slug)
 	return render(request, 'blog/jinja2/post.html',{'post':post})
-	
+
 def get_search_results(request):
-	query = request.GET.get('q', '')
+	"""
+	Search for a post by title or text
+	"""
+	# Retrieve the query data
+	query = request.GET.get('search_input', '')
 	page = request.GET.get('page', 1)
-	
-	results = Post.objects.filter(Q(text__icontains=query) | Q(title__icontains=query))
-	
+
+	# Query the database
+	if query:
+		results = Post.objects.filter(Q(body__icontains=query) | Q(title__icontains=query))
+	else:
+		results = None
 	pages = Paginator(results, 5)
-	
+
+	# Get the page
 	try:
 		returned_page = pages.page(page)
 	except EmptyPage:
 		returned_page = pages.page(pages.num_pages)
-		
-	return render(request, 'blog/jinja2/search_list.html', {'page': returned_page, 'posts': returned_page.object_list, 'search': query})
+
+	return render(request, 'blog/jinja2/search_list.html', {'page': returned_page, 'object_list': returned_page.object_list, 'search': query})
 
 #def CategoryListView(ListView):
 #	category = get_object_or_404(Category, slug=slug)
 #	categories = Category.objects.all()
 #	posts = Post.objects.filter(categories=category)
 #	return render('blog/jinja2/category.html', {'posts':posts})
-    
-
-

@@ -1,137 +1,177 @@
 from django.test import TestCase, LiveServerTestCase, Client
 from django.utils import timezone
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
 from blog.models import Post, Category, Tag
-import markdown
+from django.contrib.flatpages.models import FlatPage
+import markdown2 as markdown
+import factory.django
 
-# Reusable create post function
-def create_post():
- # Create the post
-	post = Post()
- # Create the author
-	try:
-		user = User.objects.get(username='mert')
-		user.delete()
-	except Exception as e:
-		user = User.objects.create(username='mert', email='mert@test.com', password='password')
-		user.save()
-	user, flag = User.objects.get_or_create(username='mert', email='mert@test.com', password='password')
-	user.save()
- # Set the attributes	
-	post.title = 'Test Post'
-	post.body = 'This is a test post!'
-	post.description = 'a description'
-	post.slug = 'test-post'
-	post.author = user
-	post.created = timezone.now()
-	post.updated = timezone.now()
-	post.published = True # Need this or Post.objects.all() will filter and will not return this
- # Save it
-	post.save()
-	return post
+# Factories for tests
+class SiteFactory(factory.django.DjangoModelFactory):
+	class Meta:
+		model = Site
+		django_get_or_create = (
+			'name',
+			'domain'
+		)
+	name = 'example.com'
+	domain = 'example.com'
 
-# Reusable function to create a category
-def create_category():
- # Create the category
-	cat = Category(name='howto', description='how to articles', slug='how-to')
- # Save it to db
-	cat.save()
-	return cat
+class CategoryFactory(factory.django.DjangoModelFactory):
+	class Meta:
+		model = Category
+		django_get_or_create = (
+			'name',
+			'description',
+			'slug'
+		)
 
-# Reusable function to create a tag
-def create_tag():
- # Create a tag	
-	tag = Tag(name='diy', description='diy articles', slug='diy')
- # Save it to db
-	tag.save()
-	return tag
+	name = 'how to'
+	description = 'How to articles'
+	slug = 'how-to'
+
+class TagFactory(factory.django.DjangoModelFactory):
+	class Meta:
+		model = Tag
+		django_get_or_create = (
+			'name',
+			'description',
+			'slug'
+		)
+
+	name = 'diy'
+	description = 'diy articles'
+	slug = 'diy'
+
+class AuthorFactory(factory.django.DjangoModelFactory):
+	class Meta:
+		model = User
+		django_get_or_create = (
+			'username',
+			'email',
+			'password'
+		)
+
+	username = 'mert1'
+	email = 'mert1@test.com'
+	password = 'notpassword'
+
+class PostFactory(factory.django.DjangoModelFactory):
+	class Meta:
+		model = Post
+		django_get_or_create = (
+			'title',
+			'body',
+			'description',
+			'slug',
+			'created',
+			'updated',
+			'published'
+		)
+
+	title = 'Test Post'
+	body = 'This is a test post!'
+	description = 'a description'
+	slug = 'test-post'
+	created = timezone.now()
+	updated = timezone.now()
+	published = True # Need this or Post.objects.all() will filter and will not return this
+	author = factory.SubFactory(AuthorFactory)
+	site = factory.SubFactory(SiteFactory)
+	category = factory.SubFactory(CategoryFactory)
+
+class FlatPageFactory(factory.django.DjangoModelFactory):
+	class Meta:
+		model = FlatPage
+		django_get_or_create = (
+			'url',
+			'title',
+			'content'
+		)
+
+	url = 'blog/about/'
+	title = 'About me'
+	content = 'All about me'
 
 # Test cases for the post class
 class PostTest(TestCase):
+
+	# Test case to ensure creating a category
+	def test_create_category(self):
+		cat = CategoryFactory()
+	# Check category
+		allCats = Category.objects.all()
+		self.assertEquals(len(allCats), 1)
+		myCat = allCats[0]
+		self.assertEquals(myCat, cat)
+		self.assertEquals(myCat.name, 'how to')
+		self.assertEquals(myCat.description, 'How to articles')
+		self.assertEquals(myCat.slug, 'how-to')
+
+	# Test case to ensure creating a tag
+		def test_create_tag(self):
+			tag = TagFactory()
+		# Check tag
+			allTags = Tag.objects.all()
+			self.assertEquals(len(allTags), 1)
+			myTag = allTags[0]
+			self.assertEquals(myTag, tag)
+			self.assertEquals(myTag.name, 'diy')
+			self.assertEquals(myTag.description, 'diy articles')
+			self.assertEquals(myTag.slug, 'diy')
+
 	def test_create_post(self):
 	# Create the post
-		post = create_post()
+		post = PostFactory()
 	# Check if I can find post
 		allPosts = Post.objects.all()
 		self.assertEquals(len(allPosts), 1)
 		myPost = allPosts[0]
 		self.assertEquals(myPost, post)
+	# Add a tag
+		tag = TagFactory()
+		post.tags.add(tag)
 	# Check attributes
 		self.assertEquals(myPost.title, 'Test Post')
 		self.assertEquals(myPost.body, 'This is a test post!')
 		self.assertEquals(myPost.description, 'a description')
 		self.assertEquals(myPost.slug, 'test-post')
-		self.assertEquals(myPost.author.username, 'mert')
-		self.assertEquals(myPost.author.email, 'mert@test.com')
+		self.assertEquals(myPost.site.name, 'example.com')
+		self.assertEquals(myPost.site.domain, 'example.com')
+		self.assertEquals(myPost.author.username, 'mert1')
+		self.assertEquals(myPost.author.email, 'mert1@test.com')
 		self.assertEquals(myPost.created.day, post.created.day)
 		self.assertEquals(myPost.created.month, post.created.month)
 		self.assertEquals(myPost.created.year, post.created.year)
 		self.assertEquals(myPost.created.hour, post.created.hour)
 		self.assertEquals(myPost.created.minute, post.created.minute)
 		self.assertEquals(myPost.created.second, post.created.second)
-		
-class CategoryTest(TestCase):
-	def test_create_category(self):
-		cat = create_category()
-	# Check category
-		allCats = Category.objects.all()
-		self.assertEquals(len(allCats), 1)
-		myCat = allCats[0]
-		self.assertEquals(myCat, cat)
-		self.assertEquals(myCat.name, 'howto')
-		self.assertEquals(myCat.description, 'how to articles')
-		self.assertEquals(myCat.slug, 'how-to')
-	# Check assigning to a post
-		post = create_post()
-		post.save()
-		count = Post.objects.count()
-		self.assertEquals(count, 1)
-		post.category = cat
-		post.save()
-		p = Post.objects.get(id=1)
-		self.assertEquals(p.category, cat)
-		
-class TagTest(TestCase):
-	def test_create_tag(self):
-		tag = create_tag()
-	# Check tag
-		allTags = Tag.objects.all()
-		self.assertEquals(len(allTags), 1)
-		myTag = allTags[0]
-		self.assertEquals(myTag, tag)
-		self.assertEquals(myTag.name, 'diy')
-		self.assertEquals(myTag.description, 'diy articles')
-		self.assertEquals(myTag.slug, 'diy')
-	# Check assigning to a post
-		post = create_post()
-		post.save()
-		count = Post.objects.count()
-		self.assertEquals(count, 1)
-		post.tags.add(tag)
-		post.save()
-		p = Post.objects.get(id=1)
-		post_tags = p.tags.all()
-		self.assertEquals(len(post_tags), 1)
-		only_post_tag = post_tags[0]
-		self.assertEquals(only_post_tag, tag)
-		self.assertEquals(only_post_tag.name, 'diy')
-		self.assertEquals(only_post_tag.description, 'diy articles')
-		
-class AdminTest(LiveServerTestCase):
-	fixtures = ['testUsers.json'] # get test user to login
-	
+		self.assertEqual(myPost.category.name, 'how to')
+		self.assertEqual(myPost.category.description, 'How to articles')
+
+		# Check tags
+		ptags = myPost.tags.all()
+		self.assertEqual(len(ptags), 1)
+		ptag = ptags[0]
+		self.assertEqual(ptag, tag)
+
+class BaseAcceptanceTest(LiveServerTestCase):
 	def setUp(self):
-	# Create a client
 		self.client = Client()
-	
-	def test_login(self):
+
+class AdminTest(BaseAcceptanceTest):
+	fixtures = ['testUsers.json'] # get test user to login
+
+	def test_login_logout(self):
 	# Get the login page
 		response = self.client.get('/admin/', follow=True) # had to add follow to get rid of redirect errors
 	# Make sure we got a valid response
-		self.assertEquals(response.status_code, 200)		
+		self.assertEquals(response.status_code, 200)
 	# check that we get a login page
 		self.assertTrue(b'Log in' in response.content) # had to cast to bytes object
-	# Log in 
+	# Log in
 		self.client.login(username='test', password='notpassword')
 		response = self.client.get('/admin/', follow=True)
 		self.assertEquals(response.status_code, 200)
@@ -141,72 +181,430 @@ class AdminTest(LiveServerTestCase):
 		response = self.client.get('/admin/', follow=True)
 		self.assertEquals(response.status_code, 200)
 		self.assertTrue(b'Log in' in response.content)
-	
-	# TODO fix posts below	
+
+	def test_create_category(self):
+	# Log in
+		self.client.login(username='test', password='notpassword')
+	# Check response code
+		response = self.client.get('/admin/blog/category/add/')
+		self.assertEquals(response.status_code, 200)
+	# Create the new category
+		response = self.client.post('/admin/blog/category/add/', {
+			'name': 'how to',
+			'description': 'How to articles'
+			},
+			follow=True
+		)
+		self.assertEquals(response.status_code, 200)
+	# Check added successfully
+		self.assertTrue(b'added successfully' in response.content)
+	# Check new category is in database
+		all_cats = Category.objects.all()
+		self.assertEquals(len(all_cats), 1)
+
+	def test_edit_category(self):
+		cat = CategoryFactory()
+	# Log in
+		self.client.login(username='test', password='notpassword')
+	# Edit the category
+		response = self.client.post('/admin/blog/category/' + str(cat.pk) + '/change/', {
+			'name': 'python',
+			'description': 'The python programming language'
+			},
+			follow=True
+		)
+	# Check successful change
+		self.assertEquals(response.status_code, 200)
+		self.assertTrue(b'changed successfully' in response.content)
+		all_cats = Category.objects.all()
+		self.assertEquals(len(all_cats), 1)
+		myCat = all_cats[0]
+		self.assertEquals(myCat.name, 'python')
+		self.assertEquals(myCat.description, 'The python programming language')
+
+	def test_delete_category(self):
+		category = CategoryFactory()
+		self.client.login(username='test', password='notpassword')
+	# Delete the category
+		response = self.client.post('/admin/blog/category/' + str(category.pk) + '/delete/', {
+			'post':'yes'
+			},
+			follow=True
+		)
+	# Check successful delete
+		self.assertTrue(b'deleted successfully' in response.content)
+	# Check category deleted
+		all_cats = Category.objects.all()
+		self.assertEquals(len(all_cats), 0)
+
+	def test_create_tag(self):
+	# Log in
+		self.client.login(username='test', password='notpassword')
+	# Check response code
+		response = self.client.get('/admin/blog/tag/add/')
+		self.assertEquals(response.status_code, 200)
+	# Create the new tag
+		response = self.client.post('/admin/blog/tag/add/', {
+			'name': 'diy',
+			'description': 'diy articles'
+			},
+			follow=True
+		)
+		self.assertEquals(response.status_code, 200)
+	# Check added successfully
+		self.assertTrue(b'added successfully' in response.content)
+	# Check new tag is in database
+		all_tags = Tag.objects.all()
+		self.assertEquals(len(all_tags), 1)
+
+	def test_edit_tag(self):
+		tag = TagFactory()
+	# Log in
+		self.client.login(username='test', password='notpassword')
+	# Edit the tag
+		response = self.client.post('/admin/blog/tag/' + str(tag.pk) + '/change/', {
+			'name': 'python',
+			'description': 'The python programming language'
+			},
+			follow=True
+		)
+	# Check successful change
+		self.assertEquals(response.status_code, 200)
+		self.assertTrue(b'changed successfully' in response.content)
+		all_tags = Tag.objects.all()
+		self.assertEquals(len(all_tags), 1)
+		myTag = all_tags[0]
+		self.assertEquals(myTag.name, 'python')
+		self.assertEquals(myTag.description, 'The python programming language')
+
+	def test_delete_tag(self):
+		tag = TagFactory()
+		self.client.login(username='test', password='notpassword')
+	# Delete the tag
+		response = self.client.post('/admin/blog/tag/' + str(tag.pk) + '/delete/', {
+			'post':'yes'
+			},
+			follow=True
+		)
+	# Check successful delete
+		self.assertTrue(b'deleted successfully' in response.content)
+	# Check tag deleted
+		all_tags = Tag.objects.all()
+		self.assertEquals(len(all_tags), 0)
+
 	def test_create_post(self):
+		category = CategoryFactory()
+		tag = TagFactory()
 		self.client.login(username='test', password='notpassword')
 		response = self.client.get('/admin/blog/post/add/')
 		self.assertEquals(response.status_code, 200)
 	# Create a post
 		response = self.client.post('/admin/blog/post/add/', {
-			'title': 'test post',
-			'author': 'itorain',
-			'slug': 'slugtest',
-			'body': 'the body of the test post',
-			'description': 'test description',	
-			'category': 'how-to',	
+			'title': 'Test Post',
+			'slug': 'test-post',
+			'body': 'This is a test post!',
+			'description': 'a description',
+			'category': str(category.pk),
+			'created_0': '2016-08-12',
+			'created_1': '22:22:23',
 			'updated_0': '2016-08-12',
 			'updated_1': '22:22:23',
-			'published': 'True'
-		}, follow=True)	
+			'site': '1',
+			'published': 'True',
+			'tags': str(tag.pk)
+			},
+			follow=True
+		)
 		self.assertEquals(response.status_code, 200)
-		#self.assertTrue(b'added successfully' in response.content)
+	# Check successful post
+		self.assertTrue(b'added successfully' in response.content)
 	# Check new post now in database
-		#posts = Post.objects.all()
-		#self.assertEquals(len(posts), 1)
-		
-	# TODO fix this
-	def test_edit_post(self):
-		post = create_post()
+		posts = Post.objects.all()
+		self.assertEquals(len(posts), 1)
+
+	def test_create_post_without_tag(self):
+		category = CategoryFactory()
 		self.client.login(username='test', password='notpassword')
-		response = self.client.post('/admin/blog/post/1/', {
+		response = self.client.get('/admin/blog/post/add/')
+		self.assertEquals(response.status_code, 200)
+	# Create a post
+		response = self.client.post('/admin/blog/post/add/', {
+			'title': 'Test Post',
+			'slug': 'test-post',
+			'body': 'This is a test post!',
+			'description': 'a description',
+			'category': str(category.pk),
+			'created_0': '2016-08-12',
+			'created_1': '22:22:23',
+			'updated_0': '2016-08-12',
+			'updated_1': '22:22:23',
+			'site': '1',
+			'published': 'True',
+			},
+			follow=True
+		)
+		self.assertEquals(response.status_code, 200)
+	# Check successful post
+		self.assertTrue(b'added successfully' in response.content)
+	# Check new post now in database
+		posts = Post.objects.all()
+		self.assertEquals(len(posts), 1)
+
+	def test_edit_post(self):
+		post = PostFactory()
+		category = CategoryFactory()
+		tag = TagFactory()
+		post.tags.add(tag)
+		self.client.login(username='test', password='notpassword')
+		response = self.client.post('/admin/blog/post/' + str(post.pk) + '/change/', {
 			'title': 'changed the title',
 			'updated_0': '2016-08-12',
 			'updated_1': '22:22:23'
-		}, follow=True)
+			},
+			follow=True
+		)
 		self.assertEquals(response.status_code, 200)
 		self.assertTrue(b'changed successfully' in response.content)
 		posts = Post.objects.all()
 		self.assertEquals(len(posts), 1)
-		only_post = posts[0]
-		self.assertEquals(only_post.title, 'changed the title')
-	
-	# TODO fix this	
+		myPost = posts[0]
+		self.assertEquals(myPost.title, 'changed the title')
+
 	def test_delete_post(self):
-		post = create_post()
+		post = PostFactory()
+		tag = TagFactory()
+		post.tags.add(tag)
+		posts = Post.objects.all()
+		self.assertEqual(len(posts), 1)
 		self.client.login(username='test', password='notpassword')
-		response = self.client.post('/admin/blog/post/1/delete/', {
+		response = self.client.post('/admin/blog/post/' + str(post.pk) + '/delete/', {
 			'post': 'yes'
-		}, follow=True)
+			},
+			follow=True
+		)
 		self.assertEquals(response.status_code, 200)
 		self.assertTrue(b'deleted successfully' in response.content)
 		posts = Post.objects.all()
 		self.assertEquals(len(posts), 0)
 
-class PostViewTest(LiveServerTestCase):
-	def setUp(self):
-		self.client = Client()
-		
-	def test_index(self):
-		post = create_post()
-		response = self.client.get('/')
-		self.assertEquals(response.status_code, 200)
-	# Check the post title is in the response
-		self.assertTrue(post.title in response.content)
+class PostViewTest(BaseAcceptanceTest):
+	def text_index(self):
+	# Create the post
+		post = PostFactory(body='This is [my first blog post](http://127.0.0.1:8000/)')
+    # Create the tag
+		tag = TagFactory(name='python', description='Python programming language')
+		post.tags.add(tag)
+    # Check new post saved
+		posts = Post.objects.all()
+		self.assertEqual(len(posts), 1)
+    # Fetch the index
+		response = self.client.get(reverse('blog:post_list'))
+		self.assertEqual(response.status_code, 200)
+    # Check the post title is in the response
+		self.assertTrue(post.title in response.content.decode('utf-8'))
     # Check the post text is in the response
-		self.assertTrue(post.text in response.content)
+		self.assertTrue(markdown.markdown(post.body) in response.content.decode('utf-8'))
+    # Check the post category is in the response
+		self.assertTrue(post.category.name in response.content.decode('utf-8'))
+    # Check the post tag is in the response
+		post_tag = posts[0].tags.all()[0]
+		self.assertTrue(post_tag.name in response.content.decode('utf-8'))
     # Check the post date is in the response
-		self.assertTrue(str(post.updated.year) in response.content)
-		self.assertTrue(post.pub_date.strftime('%b') in response.content)
-		self.assertTrue(str(post.updated.day) in response.content)
-		
+		self.assertTrue(str(post.updated.year) in response.content.decode('utf-8'))
+		self.assertTrue(post.updated.strftime('%b') in response.content.decode('utf-8'))
+		self.assertTrue(str(post.updated.day) in response.content.decode('utf-8'))
+    # Check the link is marked up properly
+		self.assertTrue('<a href="http://127.0.0.1:8000/">my first blog post</a>' in response.content.decode('utf-8'))
+    # Check the correct template was used
+		self.assertTemplateUsed(response, 'blog/jinja2/post_list.html')
+
+	def test_post_page(self):
+		post = PostFactory(body='This is [my first blog post](http://127.0.0.1:8000/)')
+		tag = TagFactory(name='python', description='Python programming language')
+		post.tags.add(tag)
+    # Check new post saved
+		posts = Post.objects.all()
+		self.assertEqual(len(posts), 1)
+		myPost = posts[0]
+		self.assertEqual(myPost, post)
+    # Get the post URL
+		url = myPost.get_absolute_url()
+    # Fetch the post
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+    # Check the post title is in the response
+		self.assertTrue(post.title in response.content.decode('utf-8'))
+    # Check the post category is in the response
+		self.assertTrue(post.category.name in response.content.decode('utf-8'))
+    # Check the post tag is in the response
+		myTag = posts[0].tags.all()[0]
+		self.assertTrue(myTag.name in response.content.decode('utf-8'))
+    # Check the post text is in the response
+		self.assertTrue(markdown.markdown(post.body) in response.content.decode('utf-8'))
+    # Check the post date is in the response
+		self.assertTrue(str(post.updated.year) in response.content.decode('utf-8'))
+		self.assertTrue(post.updated.strftime('%b') in response.content.decode('utf-8'))
+		self.assertTrue(str(post.updated.day) in response.content.decode('utf-8'))
+    # Check the link is marked up properly
+		self.assertTrue('<a href="http://127.0.0.1:8000/">my first blog post</a>' in response.content.decode('utf-8'))
+    # Check the correct template was used
+		self.assertTemplateUsed(response, 'blog/jinja2/post.html')
+
+	def test_category_page(self):
+		post = PostFactory(body='This is [my first blog post](http://127.0.0.1:8000/)')
+		posts = Post.objects.all()
+		self.assertEqual(len(posts), 1)
+		myPost = posts[0]
+		self.assertEqual(myPost, post)
+    # Get the category URL
+		url = post.category.get_absolute_url()
+    # Fetch the category
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+    # Check the category name is in the response
+		self.assertTrue(post.category.name in response.content.decode('utf-8'))
+    # Check the post text is in the response
+		self.assertTrue(markdown.markdown(post.body) in response.content.decode('utf-8'))
+    # Check the post date is in the response
+		self.assertTrue(str(post.updated.year) in response.content.decode('utf-8'))
+		self.assertTrue(post.updated.strftime('%b') in response.content.decode('utf-8'))
+		self.assertTrue(str(post.updated.day) in response.content.decode('utf-8'))
+    # Check the link is marked up properly
+		self.assertTrue('<a href="http://127.0.0.1:8000/">my first blog post</a>' in response.content.decode('utf-8'))
+    # Check the correct template was used
+		self.assertTemplateUsed(response, 'blog/jinja2/category_view.html')
+
+	def test_nonexistent_category_page(self):
+		url = '/blog/category/blah/'
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+
+	def test_tag_page(self):
+		author = AuthorFactory()
+		site = SiteFactory()
+		post = PostFactory(body='This is [my first blog post](http://127.0.0.1:8000/)')
+		tag = TagFactory()
+		post.tags.add(tag)
+    # Check new post saved
+		posts = Post.objects.all()
+		self.assertEqual(len(posts), 1)
+		myPost = posts[0]
+		self.assertEqual(myPost, post)
+    # Get the tag URL
+		url = post.tags.all()[0].get_absolute_url()
+    # Fetch the tag
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+    # Check the tag name is in the response
+		self.assertTrue(post.tags.all()[0].name in response.content.decode('utf-8'))
+    # Check the post text is in the response
+		self.assertTrue(markdown.markdown(post.body) in response.content.decode('utf-8'))
+    # Check the post date is in the response
+		self.assertTrue(str(post.updated.year) in response.content.decode('utf-8'))
+		self.assertTrue(post.updated.strftime('%b') in response.content.decode('utf-8'))
+		self.assertTrue(str(post.updated.day) in response.content.decode('utf-8'))
+    # Check the link is marked up properly
+		self.assertTrue('<a href="http://127.0.0.1:8000/">my first blog post</a>' in response.content.decode('utf-8'))
+    # Check the correct template was used
+		self.assertTemplateUsed(response, 'blog/jinja2/tag_view.html')
+
+	def test_nonexistent_tag_page(self):
+		url = '/blog/tag/blah/'
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+
+    # def test_clear_cache(self):
+    #     # Create the first post
+    #     post = PostFactory(body='This is [my first blog post](http://127.0.0.1:8000/)')
+    #     tag = TagFactory(name='perl', description='The Perl programming language')
+    #     post.tags.add(tag)
+	#
+    #     # Check new post saved
+    #     posts = Post.objects.all()
+    #     self.assertEqual(len(posts), 1)
+	#
+    #     # Fetch the index
+    #     response = self.client.get(reverse('blog:index'))
+    #     self.assertEqual(response.status_code, 200)
+	#
+    #     # Create the second post
+    #     post = PostFactory(title='My second post',body='This is [my second blog post](http://127.0.0.1:8000/)', slug='my-second-post')
+    #     post.tags.add(tag)
+	#
+    #     # Fetch the index again
+    #     response = self.client.get(reverse('blog:index'))
+	#
+    #     # Check second post present
+	# 	self.assertTrue('my second blog post' in response.content.decode('utf-8'))
+
+class FlatPageViewTest(BaseAcceptanceTest):
+	def test_create_flat_page(self):
+    # Create flat page
+		page = FlatPageFactory()
+    # Add the site
+		page.sites.add(Site.objects.all()[0])
+		page.save()
+    # Check new page saved
+		pages = FlatPage.objects.all()
+		self.assertEqual(len(pages), 1)
+		myPage = pages[0]
+		self.assertEqual(myPage, page)
+    # Check data correct
+		self.assertEqual(myPage.url, 'blog/about/')
+		self.assertEqual(myPage.title, 'About me')
+		self.assertEqual(myPage.content, 'All about me')
+    # Get URL
+		url = '/blog/about/'
+    # Get the page
+		response = self.client.get(url)
+		self.assertEqual(response.status_code, 200)
+    # Check title and content in response
+		self.assertTrue('About me' in response.content.decode('utf-8'))
+		self.assertTrue('All about me' in response.content.decode('utf-8'))
+
+class SearchViewTest(BaseAcceptanceTest):
+	def test_search(self):
+    # Create a post
+		post = PostFactory()
+    # Create another post
+		post2 = PostFactory(body='This is my *second* blog post', title='My second post', slug='my-second-post')
+    # Search for first post
+		response = self.client.get(reverse('blog:search') + '?q=first')
+		self.assertEqual(response.status_code, 200)
+    # Check the first post is contained in the results
+		self.assertTrue('My first post' in response.content.decode('utf-8'))
+    # Check the second post is not contained in the results
+		self.assertTrue('My second post' not in response.content.decode('utf-8'))
+    # Search for second post
+		response = self.client.get(reverse('blog:search') + '?q=second')
+		self.assertEqual(response.status_code, 200)
+    # Check the first post is not contained in the results
+		self.assertTrue('My first post' not in response.content.decode('utf-8'))
+    # Check the second post is contained in the results
+		self.assertTrue('My second post' in response.content.decode('utf-8'))
+
+	def test_failing_search(self):
+    # Search for something that is not present
+		response = self.client.get(reverse('blog:search') + '?q=wibble')
+		self.assertEqual(response.status_code, 200)
+		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+    # Try to get nonexistent second page
+		response = self.client.get(reverse('blog:search') + '?q=wibble&page=2')
+		self.assertEqual(response.status_code, 200)
+		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+
+class SitemapTest(BaseAcceptanceTest):
+	def test_sitemap(self):
+    # Create a post
+		post = PostFactory()
+    # Create a flat page
+		page = FlatPageFactory()
+    # Get sitemap
+		response = self.client.get('/sitemap.xml')
+		self.assertEqual(response.status_code, 200)
+    # Check post is present in sitemap
+		self.assertTrue('my-first-post' in response.content.decode('utf-8'))
+    # Check page is present in sitemap
+		self.assertTrue('/about/' in response.content.decode('utf-8'))
