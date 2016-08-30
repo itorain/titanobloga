@@ -20,7 +20,7 @@ class Post(models.Model):
 	created = models.DateTimeField(auto_now_add=True, auto_now=False)
 	category = models.ForeignKey('blog.Category', blank=True, null=True)
 	site = models.ForeignKey(Site)
-	updated = models.DateTimeField(db_index=True, blank=True, null=True)
+	updated = models.DateTimeField(blank=True, null=True)
 	published = models.BooleanField(default=False)
 	tags = models.ManyToManyField('blog.Tag', blank=True, null=True)
 	objects = PostManager()

@@ -70,7 +70,7 @@ def get_search_results(request):
 	Search for a post by title or text
 	"""
 	# Retrieve the query data
-	query = request.GET.get('search_input', '')
+	query = request.GET.get('q', '')
 	page = request.GET.get('page', 1)
 
 	# Query the database
@@ -86,7 +86,7 @@ def get_search_results(request):
 	except EmptyPage:
 		returned_page = pages.page(pages.num_pages)
 
-	return render(request, 'blog/jinja2/search_list.html', {'page': returned_page, 'object_list': returned_page.object_list, 'search': query})
+	return render(request, 'blog/jinja2/search_list.html', {'page_obj': returned_page, 'object_list': returned_page.object_list, 'search': query})
 
 #def CategoryListView(ListView):
 #	category = get_object_or_404(Category, slug=slug)

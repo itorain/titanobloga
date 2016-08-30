@@ -20,6 +20,7 @@ from django.contrib.flatpages import views
 urlpatterns = [
 	url(r'^admin/', admin.site.urls),
     url(r'', include('blog.urls', namespace='blog')),
-    url(r'^About/$', views.flatpage, {'url': '/About/'}, name='about_page'),
-    url(r'^Contact/$', views.flatpage, {'url':'/Contact/'}, name='contact_page')
+    url(r'', include('django.contrib.flatpages.urls')),
+    #url(r'^About/$', views.flatpage, {'url': '/About/'}, name='about_page'),
+    #url(r'^Contact/$', views.flatpage, {'url':'/Contact/'}, name='contact_page')
 ]
