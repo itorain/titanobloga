@@ -1,0 +1,26 @@
+.hero {
+    /*This is for the deep space gradient background*/
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+}
+
+.title {
+    color: #f7ff00;
+}
+
+.title a {
+    /*color: #191919;*/
+}
+
+.tabs li.is-active a {
+  border-bottom-color: #f7ff00;
+  color: #f7ff00;
+}
+
+.tabs a:hover {
+  border-bottom-color: #e5e6e6;
+  color: #e5e6e6;
+}
+
+#search_box, #search_input_btn {
+    background-color: #f5f7fa   ;
+}

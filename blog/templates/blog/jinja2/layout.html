@@ -14,8 +14,9 @@
 	{% load staticfiles %}
 	<link rel="stylesheet" href="{% static 'blog/css/bulma.css' %}">
 	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
-	<link rel="stylesheet" href="{% static 'blog/css/main.css' %}">
-	<link rel="stylesheet" href="{% static 'blog/css/code_higlighting.css' %}">
+	<link rel="stylesheet" href="{% static 'blog/css/custom.css' %}">
+	<link rel="stylesheet" href="{% static 'blog/css/code_highlighting.css' %}">
+	<link rel="stylesheet" href="{% static 'blog/css/stars.css' %}">
 </head>
 
 <body class="blog-body">
@@ -24,7 +25,10 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 
         <![endif]-->
-    <section class="hero is-primary is-bold is-small">
+    <section class="hero is-clear is-bold is-small">
+		<div id='stars'></div>
+		<div id='stars2'></div>
+		<div id='stars3'></div>
     	<div class="hero-head">
     	</div>
     	<div class="hero-body">
@@ -32,26 +36,32 @@
     			<h1 class="title">
     				Zay's Blog
     			</h1>
-    			<h2 class="subtitle">
+    			<h2 class="subtitle is-light">
     				A Django based micro blog
     			</h2>
     		</div>
     	</div>
     	<div class="hero-foot">
-    		<nav class="nav-center tabs">
-    			<div class="container">
-    				<ul>
-    					{% block navlist %}
-    					{% endblock %}
-    				</ul>
-    			</div>
-    		</nav>
-			<form action="/blog/search" method="GET">
-				<p class="control is-pulled-right has-addons">
-					<input class="input" type="text" placeholder="Search..." name="q">
-					<input class="button is-white is-outlined" type="submit">Search</a>
-				</p>
-			</form>
+			<div class="container">
+				<div class="columns is-vcentered">
+					<div class="column">
+						<nav class="nav-center tabs">
+						<ul>
+						{% block navlist %}
+						{% endblock %}
+						</ul>
+						</nav>
+					</div>
+					<div class="column is-narrow">
+						<form action="/blog/search" method="GET">
+							<p class="control is-pulled-right has-addons">
+								<input id="search_box" class="input" type="text" placeholder="Search..." name="q">
+								<input id="search_input_btn" class="button" type="submit" value="Search"></a>
+							</p>
+						</form>
+					</div>
+				</div>
+			</div>
     	</div>
     </section>
     <section class="section">
@@ -65,11 +75,17 @@
 				<p>
 					Isaiah Torain. Source code license: <a href="http://opensource.org/licenses/mit-license.php">MIT</a>
 				</p>
-				<p>
-        			<a class="icon" href="https://github.com/jgthms/bulma">
+				<span>
+        			<a class="icon" href="https://github.com/itorain">
           				<i class="fa fa-github"></i>
         			</a>
-      			</p>
+					<a class="icon" href="https://www.instagram.com/zay_apollo/">
+						<i class="fa fa-instagram"></i>
+					</a>
+					<a class="icon" href="https://www.linkedin.com/in/isaiah-torain-243868107">
+						<i class="fa fa-linkedin"></i>
+					</a>
+      			</span>
       		</div>
       	</div>
 	</footer>
