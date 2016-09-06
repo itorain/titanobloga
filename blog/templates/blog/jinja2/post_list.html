@@ -1,11 +1,9 @@
 {% extends "blog/jinja2/layout.html" %}
-{% load admin_urls %}
 	{% block navlist %}
-	{% load admin_urls %}
 		<li class="nav-item is-active"> <a href="{% url 'blog:post_list' %}">Blog</a> </li>
 		<li class="nav-item"> <a href="{% url 'blog:archive' %}">Archive</a> </li>
-		<li class="nav-item"> <a href="{% url 'admin:index' %}">Gallery</a> </li>
-		<li> <a>About</a> </li>
+		<li class="nav-item"> <a href="{% url 'blog:gallery' %}">Gallery</a> </li>
+		<li class="nav-item"> <a href="/about/">About</a> </li>
 	{% endblock %}
 	{% load custom_markdown %}
 	{% block content %}
@@ -15,24 +13,33 @@
 			<div class="column">
         {% for post in object_list %}
 		    	<article class="box">
-		    		<p class="title"> <a href="{{ post.get_absolute_url }}">{{ post.title }}</a> </p>
+		    		<p class="title is-large"> <a href="{{ post.get_absolute_url }}">{{ post.title }}</a> </p>
 					<p class="subtitle">
 						<small> {{post.updated}} </small>
 					</p>
-	    			<p class="content">{{ post.description }}</p>
+	    			<p class="content is-medium">{{ post.description }}</p>
+					{% if post.category %}
 					<a class="content" href="{{ post.category.get_absolute_url }}">{{ post.category.name }}</a>
+                    {% endif %}
+                    {% if post.tags %}
 					{% for tag in post.tags.all %}
 					<a class="tag" href="{{ tag.get_absolute_url }}">{{ tag.name }}</a>
 					{% endfor %}
+                    {% endif %}
 	    		</article>
         {% endfor %}
 			</div>
         </div>
-	</div>
 		{% else %}
 			<p>No posts yet!</p>
 		{% endif %}
+	<nav class="pagination">
+	{% if page_obj.has_previous %}
+		<a class="button is-large" href="/blog/{{ page_obj.previous_page_number }}/">Previous Page</a>
+	{% endif %}
+	{% if page_obj.has_next %}
+		<a class="button is-large" href="/blog/{{ page_obj.next_page_number }}/">Next Page</a>
+	{% endif %}
+	</nav>
+	</div>
     {% endblock %}
-    </body>
-
-</html>

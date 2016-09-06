@@ -1,11 +1,20 @@
 {% extends "blog/jinja2/layout.html" %}
-
+    {% block navlist %}
+    <li class="nav-item"> <a href="{% url 'blog:post_list' %}">Blog</a> </li>
+    <li class="nav-item"> <a href="{% url 'blog:archive' %}">Archive</a> </li>
+    <li class="nav-item"> <a href="{% url 'blog:gallery' %}">Gallery</a> </li>
+    <li class="nav-item is-active"> <a href="/blog/about/">About</a> </li>
+    {% endblock %}
     {% load custom_markdown %}
-
     {% block content %}
-        <div class="post">
-        	<h1>{{ flatpage.title }}</h1>
-        	{{ flatpage.content|custom_markdown }}
+        <div class="container">
+            <div class="columns">
+                <div class="column">
+                    <h1 class="title is-large">{{ flatpage.title }}</h1>
+                    <div class="content is-large">
+                    {{ flatpage.content|custom_markdown }}
+                    </div>
+                </div>
+            </div>
         </div>
-
 {% endblock %}

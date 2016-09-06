@@ -1,0 +1,20 @@
+{% extends "blog/jinja2/layout.html" %}
+	{% block navlist %}
+		<li class="nav-item"> <a href="{% url 'blog:post_list' %}">Blog</a> </li>
+		<li class="nav-item"> <a href="{% url 'blog:archive' %}">Archive</a> </li>
+		<li class="nav-item is-active"> <a href="{% url 'blog:gallery' %}">Gallery</a> </li>
+		<li class="nav-item"> <a href="/about/">About</a> </li>
+	{% endblock %}
+	{% load custom_markdown %}
+	{% block content %}
+	<div class="container">
+		<div class="columns">
+			<div class="column">
+				<div class="content">
+					<p class="title is-large">Coming Soon!</p>
+					<p> This page will soon be a dedicated photos app that uses the dropbox api to pull newly uploaded photos in real time. Check back for updates!</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endblock %}

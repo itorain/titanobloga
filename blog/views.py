@@ -88,6 +88,14 @@ def get_search_results(request):
 
 	return render(request, 'blog/jinja2/search_list.html', {'page_obj': returned_page, 'object_list': returned_page.object_list, 'search': query})
 
+def archive(request):
+	categories = Category.objects.all()
+	tags = Tag.objects.all()
+	return render(request, 'blog/jinja2/archive.html', {'categories': categories, 'tags': tags})
+
+def gallery(request):
+	return render(request, 'blog/jinja2/gallery.html')
+
 #def CategoryListView(ListView):
 #	category = get_object_or_404(Category, slug=slug)
 #	categories = Category.objects.all()
