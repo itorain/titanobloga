@@ -1,19 +1,31 @@
 .hero {
     /*This is for the deep space gradient background*/
+    height: 100%;
     background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    overflow: hidden;
 }
 
 .main {
-    color: #f7ff00;
+    font-family: "lato", sans-serif;
+    font-size: 50px;
+    letter-spacing: 5px;
+    color: #FFF;
+    /*color: #FFFAAA;*/
+    /*color: #1fc8db;*/
 }
 
-.title a {
-    /*color: #191919;*/
+.archive_links {
+    color: #1fc8db;
+    font-size: 24px;
 }
 
 .tabs li.is-active a {
-  border-bottom-color: #f7ff00;
-  color: #f7ff00;
+  /*border-bottom-color: #f7ff00;
+  color: #f7ff00;*/
+}
+
+.large {
+    font-size:30px;
 }
 
 .tabs a:hover {

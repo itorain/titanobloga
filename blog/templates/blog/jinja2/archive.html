@@ -11,13 +11,13 @@
 		<div class="columns">
 			<div class="column">
 				<div class="content">
-					<p class="title">Archive by Category</p>
+					<h1>Archive by Category</h1>
 						{% for category in categories %}
-						<a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+						<a href="{{ category.get_absolute_url }}" class="archive_links">{{ category.name }}</a>
 						{% endfor %}
-					<p class="title">Archive by Tag</p>
+					<h1>Archive by Tag</h1>
 						{% for tag in tags %}
-						<a href="{{ tag.get_absolute_url }}">{{ tag.name }}</a>
+						<a href="{{ tag.get_absolute_url }}" class="archive_links">{{ tag.name }}</a>
 						{% endfor %}
 				</div>
 			</div>
