@@ -1,6 +1,7 @@
 decorator==4.0.10
 Django==1.10
 django-pylibmc-sasl==0.2.4
+django-webpack-loader==0.3.3
 factory-boy==2.7.0
 fake-factory==0.6.0
 gunicorn==19.6.0

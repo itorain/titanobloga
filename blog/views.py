@@ -45,22 +45,6 @@ class TagListView(ListView):
 			context['tag'] = None
 		return context
 
-
-# Create your views here.
-def post_list(request):
-	posts = Post.objects.all().order_by('updated')
-	paginator = Paginator(posts, 5)
-	page = request.GET.get('page')
-	try:
-		posts = paginator.page(page)
-	except PageNotAnInteger:
-	#If the page is not an integer give first page
-		posts = paginator.page(1)
-	except EmptyPage:
-	#If page is out of range
-		posts = paginator.page(paginator.num_pages)
-	return render(request, 'blog/jinja2/post_list.html',{'posts':posts})
-
 def post(request, slug):
 	post = get_object_or_404(Post, slug=slug)
 	return render(request, 'blog/jinja2/post.html',{'post':post})

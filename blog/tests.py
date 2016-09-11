@@ -16,8 +16,8 @@ class SiteFactory(factory.django.DjangoModelFactory):
 			'name',
 			'domain'
 		)
-	name = 'example.com'
-	domain = 'example.com'
+	name = 'localhost'
+	domain = '127.0.0.1:8000'
 
 class CategoryFactory(factory.django.DjangoModelFactory):
 	class Meta:
@@ -30,7 +30,7 @@ class CategoryFactory(factory.django.DjangoModelFactory):
 
 	name = 'how to'
 	description = 'How to articles'
-	slug = 'how-to'
+	slug = 'howto'
 
 class TagFactory(factory.django.DjangoModelFactory):
 	class Meta:
@@ -108,7 +108,7 @@ class PostTest(TestCase):
 		self.assertEqual(myCat, cat)
 		self.assertEqual(myCat.name, 'how to')
 		self.assertEqual(myCat.description, 'How to articles')
-		self.assertEqual(myCat.slug, 'how-to')
+		self.assertEqual(myCat.slug, 'howto')
 
 	# Test case to ensure creating a tag
 		def test_create_tag(self):
@@ -138,8 +138,8 @@ class PostTest(TestCase):
 		self.assertEqual(myPost.body, 'This is a test post!')
 		self.assertEqual(myPost.description, 'a description')
 		self.assertEqual(myPost.slug, 'test-post')
-		self.assertEqual(myPost.site.name, 'example.com')
-		self.assertEqual(myPost.site.domain, 'example.com')
+		self.assertEqual(myPost.site.name, 'localhost')
+		self.assertEqual(myPost.site.domain, '127.0.0.1:8000')
 		self.assertEqual(myPost.author.username, 'mert1')
 		self.assertEqual(myPost.author.email, 'mert1@test.com')
 		self.assertEqual(myPost.created.day, post.created.day)
@@ -309,7 +309,7 @@ class AdminTest(BaseAcceptanceTest):
 			'created_1': '22:22:23',
 			'updated_0': '2016-08-12',
 			'updated_1': '22:22:23',
-			'site': '1',
+			'site': '2',
 			'published': 'True',
 			'author': '1',
 			'tags': str(tag.pk)
@@ -340,7 +340,7 @@ class AdminTest(BaseAcceptanceTest):
 			'created_1': '22:22:23',
 			'updated_0': '2016-08-12',
 			'updated_1': '22:22:23',
-			'site': '1',
+			'site': '2',
 			'published': 'True',
 			'author': '1'
 			},
@@ -369,7 +369,7 @@ class AdminTest(BaseAcceptanceTest):
 			'created_1': '22:22:23',
 			'updated_0': '2016-08-12',
 			'updated_1': '22:22:23',
-			'site': '1',
+			'site': '2',
 			'published': 'True',
 			'author': '1',
 			'tags': str(tag.pk)
@@ -464,7 +464,7 @@ class PostViewTest(BaseAcceptanceTest):
 		self.assertTemplateUsed(response, 'blog/jinja2/post.html')
 
 	def test_category_page(self):
-		post = PostFactory(body='This is [my first blog post](http://127.0.0.1:8000/)')
+		post = PostFactory()
 		posts = Post.objects.all()
 		self.assertEqual(len(posts), 1)
 		myPost = posts[0]
@@ -477,13 +477,11 @@ class PostViewTest(BaseAcceptanceTest):
     # Check the category name is in the response
 		self.assertTrue(post.category.name in response.content.decode('utf-8'))
     # Check the post text is in the response
-		self.assertTrue(markdown.markdown(post.body) in response.content.decode('utf-8'))
+		self.assertTrue(post.description in response.content.decode('utf-8'))
     # Check the post date is in the response
 		self.assertTrue(str(post.updated.year) in response.content.decode('utf-8'))
 		self.assertTrue(post.updated.strftime('%b') in response.content.decode('utf-8'))
 		self.assertTrue(str(post.updated.day) in response.content.decode('utf-8') or str(post.updated.day-1) in response.content.decode('utf-8')) # added this due to timezone issue
-    # Check the link is marked up properly
-		self.assertTrue('<a href="http://127.0.0.1:8000/">my first blog post</a>' in response.content.decode('utf-8'))
     # Check the correct template was used
 		self.assertTemplateUsed(response, 'blog/jinja2/category_view.html')
 
@@ -491,12 +489,12 @@ class PostViewTest(BaseAcceptanceTest):
 		url = '/blog/category/blah/'
 		response = self.client.get(url)
 		self.assertEqual(response.status_code, 200)
-		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+		self.assertTrue('No posts' in response.content.decode('utf-8'))
 
 	def test_tag_page(self):
 		author = AuthorFactory()
 		site = SiteFactory()
-		post = PostFactory(body='This is [my first blog post](http://127.0.0.1:8000/)')
+		post = PostFactory()
 		tag = TagFactory()
 		post.tags.add(tag)
     # Check new post saved
@@ -512,13 +510,11 @@ class PostViewTest(BaseAcceptanceTest):
     # Check the tag name is in the response
 		self.assertTrue(post.tags.all()[0].name in response.content.decode('utf-8'))
     # Check the post text is in the response
-		self.assertTrue(markdown.markdown(post.body) in response.content.decode('utf-8'))
+		self.assertTrue(post.description in response.content.decode('utf-8'))
     # Check the post date is in the response
 		self.assertTrue(str(post.updated.year) in response.content.decode('utf-8'))
 		self.assertTrue(post.updated.strftime('%b') in response.content.decode('utf-8'))
 		self.assertTrue(str(post.updated.day) in response.content.decode('utf-8') or str(post.updated.day-1) in response.content.decode('utf-8')) # added this due to timezone issue
-    # Check the link is marked up properly
-		self.assertTrue('<a href="http://127.0.0.1:8000/">my first blog post</a>' in response.content.decode('utf-8'))
     # Check the correct template was used
 		self.assertTemplateUsed(response, 'blog/jinja2/tag_view.html')
 
@@ -526,7 +522,7 @@ class PostViewTest(BaseAcceptanceTest):
 		url = '/blog/tag/blah/'
 		response = self.client.get(url)
 		self.assertEqual(response.status_code, 200)
-		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+		self.assertTrue('No posts' in response.content.decode('utf-8'))
 
     # def test_clear_cache(self):
     #     # Create the first post
@@ -588,7 +584,7 @@ class SearchViewTest(BaseAcceptanceTest):
 		response = self.client.get(reverse('blog:search') + '?q=test')
 		self.assertEqual(response.status_code, 200)
     # Check the first post is contained in the results
-		self.assertTrue('test post' in response.content.decode('utf-8'))
+		self.assertTrue('Test Post' in response.content.decode('utf-8'))
     # Check the second post is not contained in the results
 		self.assertTrue('My second post' not in response.content.decode('utf-8'))
     # Search for second post
@@ -603,11 +599,11 @@ class SearchViewTest(BaseAcceptanceTest):
     # Search for something that is not present
 		response = self.client.get(reverse('blog:search') + '?q=wibble')
 		self.assertEqual(response.status_code, 200)
-		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+		self.assertTrue('No posts' in response.content.decode('utf-8'))
     # Try to get nonexistent second page
 		response = self.client.get(reverse('blog:search') + '?q=wibble&page=2')
 		self.assertEqual(response.status_code, 200)
-		self.assertTrue('No posts found' in response.content.decode('utf-8'))
+		self.assertTrue('No posts' in response.content.decode('utf-8'))
 
 class SitemapTest(BaseAcceptanceTest):
 	def test_sitemap(self):
