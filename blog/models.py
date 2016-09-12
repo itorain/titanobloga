@@ -22,7 +22,7 @@ class Post(models.Model):
 	site = models.ForeignKey(Site)
 	updated = models.DateTimeField(blank=True, null=True)
 	published = models.BooleanField(default=False)
-	tags = models.ManyToManyField('blog.Tag', blank=True, null=True)
+	tags = models.ManyToManyField('blog.Tag', blank=True)
 	objects = PostManager()
 
 	class Meta:
