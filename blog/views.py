@@ -58,10 +58,7 @@ def get_search_results(request):
 	page = request.GET.get('page', 1)
 
 	# Query the database
-	if query:
-		results = Post.objects.filter(Q(body__icontains=query) | Q(title__icontains=query))
-	else:
-		results = None
+	results = Post.objects.filter(Q(body__icontains=query) | Q(title__icontains=query))
 	pages = Paginator(results, 5)
 
 	# Get the page
