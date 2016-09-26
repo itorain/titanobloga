@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django.contrib.syndication',
     'django.contrib.sitemaps',
+    'django_jenkins',
     'blog.apps.BlogConfig',
 ]
 
@@ -140,6 +141,13 @@ SITE_ID = 2
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Continuous integration using django jenkins
+JENKINKS_TASKS = (
+    'django_jenkins.tasks.run_pylint',
+    'django_jenkins.tasks.with_coverage',
+)
+PROJECT_APPS = ['blog']
 
 #def get_cache():
 #	import os
