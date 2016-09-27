@@ -1,5 +1,5 @@
 language: python
 python:
 - "3.5"
-install: "pip install requirements.txt"
+install: "pip install --upgrade -r requirements.txt"
 script: python manage.py jenkins --enable-coverage --coverage-format htmlcov
