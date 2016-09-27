@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.syndication',
     'django.contrib.sitemaps',
     'django_jenkins',
+    'rest_framework',
     'blog.apps.BlogConfig',
 ]
 

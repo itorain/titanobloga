@@ -21,5 +21,7 @@ urlpatterns = [
     url(r'^blog/archive$', views.archive, name='archive'),
     url(r'^blog/search$', views.get_search_results, name='search'),
     url(r'^gallery/$', views.gallery, name='gallery'),
+    url(r'^api/resume$', views.api, name='api'),
+    url(r'^$', ListView.as_view(model=Post, template_name='blog/jinja2/post_list.html', paginate_by=5)),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]

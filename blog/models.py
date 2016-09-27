@@ -19,7 +19,7 @@ class Post(models.Model):
 	description = models.TextField(max_length=200)
 	created = models.DateTimeField(auto_now_add=True, auto_now=False)
 	category = models.ForeignKey('blog.Category', blank=True, null=True)
-	site = models.ForeignKey(Site)
+	site = models.ForeignKey(Site, default=1)
 	updated = models.DateTimeField(blank=True, null=True)
 	published = models.BooleanField(default=False)
 	tags = models.ManyToManyField('blog.Tag', blank=True)
@@ -38,7 +38,7 @@ class Post(models.Model):
 		if not self.slug:
 			self.slug = slugify(str(self.name))
 		super(Post, self).save(*args, **kwargs)
-        
+
 	def publish(self):
 		self.published = True
 		self.updated = timezone.now()
