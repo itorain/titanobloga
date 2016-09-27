@@ -4,4 +4,4 @@ python:
 before_install:
     - sudo apt-get install sqlite3 libsqlite3-dev
 install: "pip install -r requirements.txt"
-script: coverage run  --include="blog/*" --omit="blog/migrations/*" manage.py test blog
+script: python manage.py jenkins --enable-coverage --coverage-format htmlcov
