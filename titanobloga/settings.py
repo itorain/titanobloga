@@ -145,7 +145,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Continuous integration using django jenkins
 JENKINKS_TASKS = (
     'django_jenkins.tasks.run_pylint',
-    'django_jenkins.tasks.with_coverage',
 )
 PROJECT_APPS = ['blog']
 
