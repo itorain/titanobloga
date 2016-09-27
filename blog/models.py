@@ -38,19 +38,11 @@ class Post(models.Model):
 		if not self.slug:
 			self.slug = slugify(str(self.name))
 		super(Post, self).save(*args, **kwargs)
-
-
+        
 	def publish(self):
 		self.published = True
 		self.updated = timezone.now()
 		self.save()
-
-	# Adding a way to next and previous posts for end users
-	def get_previous_post(self):
-		return self.get_previous_by_updated()
-
-	def get_next_post(self):
-		return self.get_next_by_updated()
 
 class Category(models.Model):
 	name = models.CharField(max_length=50, db_index=True)
