@@ -1,7 +1,7 @@
 language: python
 python:
 - "3.5.1"
-before_install:
-    - sudo apt-get install sqlite3 libsqlite3-dev
 install: "pip install -r requirements.txt"
-script: python manage.py jenkins --enable-coverage --coverage-format htmlcov
+script:
+    - python manage.py migrate
+    - python manage.py jenkins --enable-coverage --coverage-format htmlcov
